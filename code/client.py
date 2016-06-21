@@ -91,4 +91,4 @@ class Client:
 		if res.status_code == 200:
 			return json.loads(res.content, 'UTF-8')
 		else:
-			raise Exception('Error: ' + str(res.status_code) + res.read())
+			raise Exception('Error: ' + str(res.status_code) + res.content)
