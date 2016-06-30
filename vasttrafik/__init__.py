@@ -1,1 +1,1 @@
-from .client import Client
+from .journy_planner import JournyPlanner
