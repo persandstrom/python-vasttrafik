@@ -9,8 +9,6 @@ import requests
 
 TOKEN_URL = 'https://api.vasttrafik.se/token'
 API_BASE_URL = 'https://api.vasttrafik.se/bin/rest.exe/v2'
-CONSUMER_KEY = '<insert your CONSUMER_KEY here>'
-CONSUMER_SECRET = '<insert your CONSUMER_SECRET here>'
 
 
 def fetch_token(key, secret):
@@ -30,65 +28,91 @@ def fetch_token(key, secret):
 class JournyPlanner:
     """ Journy planner class"""
 
-    def __init__(self, response_format='', key=CONSUMER_KEY,
-                 secret=CONSUMER_SECRET):
+    def __init__(self, key, secret, response_format=''):
         self.token = fetch_token(key, secret)
-        self.format = '&format=json' if response_format == 'JSON' else ''
+        self.format = 'json' if response_format == 'JSON' else ''
 
     # LOCATION
 
-    def get_all_stops(self):
-        """ /location.allstops """
-        data = self.get('/location.allstops')
-        return data['LocationList']['StopLocation']
+    def location_allstops(self):
+        """ location.allstops """
+        response = self.request(
+            'location.allstops')
+        return response['LocationList']['StopLocation']
 
-    def get_nearby_stops(self, lat, lon):
-        """ /location.nearbystops """
-        data = self.get(
-            '/location.nearbystops?originCoordLat=' + str(lat) +
-            '&originCoordLong=' + str(lon))
-        return data['LocationList']['StopLocation']
+    def location_nearbystops(self, origin_coord_lat, origin_coord_long):
+        """ location.nearbystops """
+        response = self.request(
+            'location.nearbystops',
+            originCoordLat=origin_coord_lat,
+            originCoordLong=origin_coord_long)
+        return response['LocationList']['StopLocation']
 
-    def get_nearby_address(self, lat, lon):
-        """ /location.nearbyaddress """
-        data = self.get(
-            '/location.nearbyaddress?originCoordLat=' + str(lat) +
-            '&originCoordLong=' + str(lon))
-        return data['LocationList']['CoordLocation']
+    def location_nearbyaddress(self, origin_coord_lat, origin_coord_long):
+        """ location.nearbyaddress """
+        response = self.request(
+            'location.nearbyaddress',
+            originCoordLat=origin_coord_lat,
+            originCoordLong=origin_coord_long)
+        return response['']['']
 
-    def get_stops_by_name(self, query):
-        """ /location.name """
-        data = self.get('/location.name?input=' + query)
-        return data['LocationList']['StopLocation']
+    def location_name(self, name):
+        """ location.name """
+        response = self.request(
+            'location.name',
+            input=name)
+        return response['LocationList']['StopLocation']
+
+    # ARRIVAL BOARD
+
+    def arrivalboard(self, stop_id, date=None, time=None):
+        """ /arrivalBoard """
+        date = date if date else time_module.strftime("%Y-%m-%d")
+        time = time if time else time_module.strftime("%H:%M")
+        response = self.request(
+            'arrivalBoard',
+            id=stop_id,
+            date=date,
+            time=time)
+        return response['ArrivalBoard']['Arrival']
+
+    # DEPARTURE BOARD
+
+    def departureboard(self, stop_id, date=None, time=None):
+        """ /departureBoard """
+        date = date if date else time_module.strftime("%Y-%m-%d")
+        time = time if time else time_module.strftime("%H:%M")
+        response = self.request(
+            'departureBoard',
+            id=stop_id,
+            date=date,
+            time=time)
+        return response['DepartureBoard']['Departure']
 
     # TRIP
 
-    def get_arrivalboard(self, stop_id, date=None, time=None):
-        """ /arrivalBoard endpoint """
-        if date and time:
-            data = self.get('/arrivalBoard?id=' + str(stop_id) + '&date=' +
-                            date + '&time=' + time)
-        else:
-            data = self.get('/arrivalBoard?id=' + str(stop_id) + '&date=' +
-                            time_module.strftime("%Y-%m-%d") +
-                            '&time=' + time_module.strftime("%H:%M"))
-        return data['ArrivalBoard']['Arrival']
+    def trip(self, origin_id, dest_id, date=None, time=None):
+        """ /trip """
+        date = date if date else time_module.strftime("%Y-%m-%d")
+        time = time if time else time_module.strftime("%H:%M")
+        response = self.request(
+            'trip',
+            originId=origin_id,
+            destId=dest_id,
+            date=date,
+            time=time)
+        return response['TripList']['Trip']
 
-    def get_departureboard(self, stop_id, date=None, time=None):
-        """ /departureBoard endpoint """
-        if date and time:
-            data = self.get('/departureBoard?id=' + str(stop_id) +
-                            '&date=' + date +
-                            '&time=' + time)
-        else:
-            data = self.get('/departureBoard?id=' + str(stop_id) +
-                            '&date=' + time_module.strftime("%Y-%m-%d") +
-                            '&time=' + time_module.strftime("%H:%M"))
-            return data['DepartureBoard']['Departure']
-
-    def get(self, endpoint):
+    def request(self, service, **parameters):
         """ request builder """
-        url = API_BASE_URL + endpoint + self.format
+        urlformat = "{baseurl}/{service}?{parameters}&format={response_format}"
+        url = urlformat.format(
+            baseurl=API_BASE_URL,
+            service=service,
+            parameters="&".join([
+                "{}={}".format(key, value) for key, value in parameters.items()
+                ]),
+            response_format=self.format)
 
         headers = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(url, headers=headers)

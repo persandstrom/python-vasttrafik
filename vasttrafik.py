@@ -10,6 +10,7 @@ from vasttrafik import JournyPlanner
 
 
 def print_table(document, *columns):
+    """ Print json document as table """
     headers = []
     for _, header in columns:
         headers.append(header)
@@ -23,6 +24,31 @@ def print_table(document, *columns):
                 row.append(None)
         table.append(row)
     print(tabulate.tabulate(table, headers))
+
+
+def print_trip_table(document):
+    """ Print trip table """
+    headers = ['Alt.', 'Name', 'Time', 'Track', 'Direction', 'Dest.', 'Track', 'Arrival']
+    table = []
+    altnr = 0
+    for alternative in document:
+        altnr += 1
+        first_trip_in_alt = True
+        for part in alternative['Leg']:
+            row = [
+                altnr if first_trip_in_alt else None,
+                part['name'],
+                part['Origin']['rtTime'] if 'rtTime' in part['Origin'] else part['Origin']['time'],
+                part['Origin']['track'],
+                part['direction'] if 'direction' in part else None,
+                part['Destination']['name'],
+                part['Destination']['track'],
+                part['Destination']['rtTime'] if 'rtTime' in part['Destination'] else part['Destination']['time'],
+                ]
+            table.append(row)
+            first_trip_in_alt = False
+    print(tabulate.tabulate(table, headers))
+
 
 # pylint: disable=C0103
 if __name__ == '__main__':
@@ -72,7 +98,7 @@ if __name__ == '__main__':
     arrival_parser.add_argument(
         'time',
         nargs='?')
-    
+
     # DEPARTURE BOARD
     departure_parser = service_parser.add_parser(
         'departureboard')
@@ -85,6 +111,19 @@ if __name__ == '__main__':
         'time',
         nargs='?')
 
+    # DEPARTURE BOARD
+    departure_parser = service_parser.add_parser(
+        'trip')
+    departure_parser.add_argument(
+        'originId')
+    departure_parser.add_argument(
+        'destinationId')
+    departure_parser.add_argument(
+        'date',
+        nargs='?')
+    departure_parser.add_argument(
+        'time',
+        nargs='?')
 
     args = parser.parse_args()
 
@@ -94,26 +133,30 @@ if __name__ == '__main__':
         secret=args.secret)
 
     if hasattr(args, 'id') and not args.id.isdigit():
-        args.id = planner.get_stops_by_name(args.id)[0]['id']
+        args.id = planner.location_name(args.id)[0]['id']
+    if hasattr(args, 'originId') and not args.originId.isdigit():
+        args.originId = planner.location_name(args.originId)[0]['id']
+    if hasattr(args, 'destinationId') and not args.destinationId.isdigit():
+        args.destinationId = planner.location_name(args.destinationId)[0]['id']
 
     # LOCATION
     if args.service == 'location':
         if args.location_method == 'allstops':
-            pprint.pprint(planner.get_all_stops())
+            pprint.pprint(planner.location_allstops())
         if args.location_method == 'name':
             print_table(
-                planner.get_stops_by_name(args.name),
+                planner.location_name(args.name),
                 ('id', 'ID'),
                 ('name', 'Name'))
         if args.location_method == 'nearbystops':
             print_table(
-                planner.get_nearby_stops(args.lat, args.lon),
+                planner.location_nearbystops(args.lat, args.lon),
                 ('id', 'ID'),
                 ('name', 'Name'),
                 ('track', 'Track'))
         if args.location_method == 'nearbyaddress':
             print_table(
-                [planner.get_nearby_address(args.lat, args.lon)],
+                [planner.location_nearbyaddress(args.lat, args.lon)],
                 ('name', 'Name'),
                 ('lon', 'Longitude'),
                 ('lat', 'Latitude'))
@@ -121,18 +164,39 @@ if __name__ == '__main__':
     # ARRIVALBOARD
     if args.service == 'arrivalboard':
         print_table(
-            planner.get_arrivalboard(args.id, args.date, args.time),
+            planner.arrivalboard(args.id, args.date, args.time),
             ('sname', 'Line'),
             ('time', 'Arrival'),
             ('rtTime', 'Prel.Arrival'),
             ('track', 'Track'))
 
-
     # DEPARTUREBOARD
     if args.service == 'departureboard':
         print_table(
-            planner.get_departureboard(args.id, args.date, args.time),
+            planner.departureboard(args.id, args.date, args.time),
             ('sname', 'Line'),
             ('time', 'Departure'),
             ('rtTime', 'Prel.Departure'),
             ('track', 'Track'))
+
+    # TRIP
+    if args.service == 'trip':
+        print_trip_table(
+            planner.trip(
+                args.originId,
+                args.destinationId,
+                args.date,
+                args.time))
+       
+        """    
+        print_table(
+            planner.trip(
+                args.originId,
+                args.destinationId,
+                args.date,
+                args.time),
+            ('sname', 'Line'),
+            ('time', 'Departure'),
+            ('rtTime', 'Prel.Departure'),
+            ('', 'Track'))
+        """
