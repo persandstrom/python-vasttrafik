@@ -1,14 +1,14 @@
-""" Setup for vasttrafik-api-wrapper """
+""" Setup for vtrp """
 
 from setuptools import setup
 
 setup(
-    name='vasttrafik',
+    name='vtrp',
     version='0.1.0',
     description='Västtrafik API.',
-    long_description='Wrapper for Västtrafik public API.',
-    url='https://github.com/axelniklasson/vasttrafik-api-wrapper',
-    author='Alex Niklasson',
+    long_description='Python implementation of Västtrafik public API.',
+    url='https://github.com/persandstrom/python-vasttrafik',
+    author='Per Sandström',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -24,4 +24,9 @@ setup(
     keywords='vasttrafik västtrafik',
     install_requires=['requests>=2.9.1'],
     packages=['vasttrafik'],
-    zip_safe=True)
+    zip_safe=True,
+    entry_points={
+        'console_scripts': [
+            'vtrp=vasttrafik.__main__:main',
+        ]
+    })

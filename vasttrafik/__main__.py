@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-""" Testmodule """
+""" Main """
 
 from __future__ import print_function
 import argparse
@@ -28,30 +26,41 @@ def print_table(document, *columns):
 
 def print_trip_table(document):
     """ Print trip table """
-    headers = ['Alt.', 'Name', 'Time', 'Track', 'Direction', 'Dest.', 'Track', 'Arrival']
+    headers = [
+        'Alt.',
+        'Name',
+        'Time',
+        'Track',
+        'Direction',
+        'Dest.',
+        'Track',
+        'Arrival']
     table = []
     altnr = 0
     for alternative in document:
         altnr += 1
         first_trip_in_alt = True
         for part in alternative['Leg']:
+            orig = part['Origin']
+            dest = part['Destination']
             row = [
                 altnr if first_trip_in_alt else None,
                 part['name'],
-                part['Origin']['rtTime'] if 'rtTime' in part['Origin'] else part['Origin']['time'],
-                part['Origin']['track'],
+                orig['rtTime'] if 'rtTime' in orig else orig['time'],
+                orig['track'],
                 part['direction'] if 'direction' in part else None,
-                part['Destination']['name'],
-                part['Destination']['track'],
-                part['Destination']['rtTime'] if 'rtTime' in part['Destination'] else part['Destination']['time'],
+                dest['name'],
+                dest['track'],
+                dest['rtTime'] if 'rtTime' in dest else dest['time'],
                 ]
             table.append(row)
             first_trip_in_alt = False
     print(tabulate.tabulate(table, headers))
 
 
-# pylint: disable=C0103
-if __name__ == '__main__':
+# pylint: disable=too-many-statements
+def main():
+    """ Main function """
     parser = argparse.ArgumentParser(
         description='Västtrafik journy planner')
     parser.add_argument(
@@ -72,7 +81,7 @@ if __name__ == '__main__':
         'name')
     location_name_parser.add_argument(
         'name')
-    location_allstops_parser = location_subparser.add_parser(
+    location_subparser.add_parser(
         'allstops')
     location_nearbystops_parser = location_subparser.add_parser(
         'nearbystops')
@@ -187,16 +196,7 @@ if __name__ == '__main__':
                 args.destinationId,
                 args.date,
                 args.time))
-       
-        """    
-        print_table(
-            planner.trip(
-                args.originId,
-                args.destinationId,
-                args.date,
-                args.time),
-            ('sname', 'Line'),
-            ('time', 'Departure'),
-            ('rtTime', 'Prel.Departure'),
-            ('', 'Track'))
-        """
+
+
+if __name__ == '__main__':
+    main()
