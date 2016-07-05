@@ -96,82 +96,108 @@ def main():
         '-k',
         '--key',
         nargs='?' if key else None,
-        default=key)
+        default=key,
+        help='API key, required argument if credentials not stored')
     parser.add_argument(
         '-s',
         '--secret',
         nargs='?' if secret else None,
-        default=secret)
+        default=secret,
+        help='API secret, required argument if credentials not stored')
     service_parser = parser.add_subparsers(
         dest='service',
-        help='service')
+        help='service to call')
 
     # STORE CREDENTIALS
     service_parser.add_parser(
-        'storecredentials')
+        'storecredentials',
+        help='Store credentials to configuration file')
 
     # LOCATION
     location_parser = service_parser.add_parser(
-        'location')
+        'location',
+        help='Get location information, e.g. stops, addresses')
     location_subparser = location_parser.add_subparsers(
         help='method',
         dest='location_method')
     location_name_parser = location_subparser.add_parser(
-        'name')
+        'name',
+        help='Get stop by name')
     location_name_parser.add_argument(
-        'name')
+        'name',
+        help='Name of stop')
     location_subparser.add_parser(
-        'allstops')
+        'allstops',
+        help='Get all stops')
     location_nearbystops_parser = location_subparser.add_parser(
-        'nearbystops')
+        'nearbystops',
+        help='Get stops nearby location')
     location_nearbystops_parser.add_argument(
-        'lat')
+        'lat',
+        help='latitude')
     location_nearbystops_parser.add_argument(
-        'lon')
+        'lon',
+        help='longitude')
     location_nearbystops_parser = location_subparser.add_parser(
-        'nearbyaddress')
+        'nearbyaddress',
+        help='Get address nearby location')
     location_nearbystops_parser.add_argument(
-        'lat')
+        'lat',
+        help='latitude')
     location_nearbystops_parser.add_argument(
-        'lon')
+        'lon',
+        help='longitude')
 
     # ARIVAL BOARD
     arrival_parser = service_parser.add_parser(
-        'arrivalboard')
+        'arrivalboard',
+        help='Get arrival board for stop')
     arrival_parser.add_argument(
-        'id')
+        'id',
+        help='Id or name of stop')
     arrival_parser.add_argument(
         'date',
-        nargs='?')
+        nargs='?',
+        help='The date, default current date')
     arrival_parser.add_argument(
         'time',
-        nargs='?')
+        nargs='?',
+        help='The time, default current time')
 
     # DEPARTURE BOARD
     departure_parser = service_parser.add_parser(
-        'departureboard')
+        'departureboard',
+        help='Get departure board for stop')
     departure_parser.add_argument(
-        'id')
+        'id',
+        help='Id or name of stop')
     departure_parser.add_argument(
         'date',
-        nargs='?')
+        nargs='?',
+        help='The date, default current date')
     departure_parser.add_argument(
         'time',
-        nargs='?')
+        nargs='?',
+        help='The time, default current time')
 
-    # DEPARTURE BOARD
+    # TRIP
     departure_parser = service_parser.add_parser(
-        'trip')
+        'trip',
+        help='Get trip suggestions')
     departure_parser.add_argument(
-        'originId')
+        'originId',
+        help='ID or name of departure stop')
     departure_parser.add_argument(
-        'destinationId')
+        'destinationId',
+        help='ID or name of destination stop')
     departure_parser.add_argument(
         'date',
-        nargs='?')
+        nargs='?',
+        help='The date, default current date')
     departure_parser.add_argument(
         'time',
-        nargs='?')
+        nargs='?',
+        help='The time, default current time')
 
     args = parser.parse_args()
 
