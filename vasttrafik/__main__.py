@@ -2,9 +2,35 @@
 
 from __future__ import print_function
 import argparse
-import pprint
+import configparser
+import os
 import tabulate
 from vasttrafik import JournyPlanner
+
+
+def get_config_path():
+    """Put together the default configuration path based on OS."""
+    dir_path = (os.getenv('APPDATA') if os.name == "nt"
+                else os.path.expanduser('~'))
+    return os.path.join(dir_path, '.vtjp')
+
+
+def read_config():
+    """Read configuration file"""
+    config = configparser.RawConfigParser(allow_no_value=True)
+    config.read(get_config_path())
+    if not config.has_section('credentials'):
+        config.add_section('credentials')
+        config.set('credentials', 'key', '')
+        config.set('credentials', 'secret', '')
+        write_config(config)
+    return config
+
+
+def write_config(config):
+    """Write configuration file"""
+    with open(get_config_path(), 'w') as configfile:
+        config.write(configfile)
 
 
 def print_table(document, *columns):
@@ -61,15 +87,28 @@ def print_trip_table(document):
 # pylint: disable=too-many-statements
 def main():
     """ Main function """
+    config = read_config()
+    key = config.get('credentials', 'key')
+    secret = config.get('credentials', 'secret')
     parser = argparse.ArgumentParser(
-        description='Västtrafik journy planner')
+        description='Västtrafik journy planner (vtjp)')
     parser.add_argument(
-        'key')
+        '-k',
+        '--key',
+        nargs='?' if key else None,
+        default=key)
     parser.add_argument(
-        'secret')
+        '-s',
+        '--secret',
+        nargs='?' if secret else None,
+        default=secret)
     service_parser = parser.add_subparsers(
         dest='service',
         help='service')
+
+    # STORE CREDENTIALS
+    service_parser.add_parser(
+        'storecredentials')
 
     # LOCATION
     location_parser = service_parser.add_parser(
@@ -148,10 +187,20 @@ def main():
     if hasattr(args, 'destinationId') and not args.destinationId.isdigit():
         args.destinationId = planner.location_name(args.destinationId)[0]['id']
 
+    # STORE CREDENTIALS
+    if args.service == 'storecredentials':
+        config.set('credentials', 'key', args.key)
+        config.set('credentials', 'secret', args.secret)
+        write_config(config)
+
     # LOCATION
     if args.service == 'location':
         if args.location_method == 'allstops':
-            pprint.pprint(planner.location_allstops())
+            print_table(
+                planner.location_allstops(),
+                ('id', 'ID'),
+                ('name', 'Name'),
+                ('track', 'Track'))
         if args.location_method == 'name':
             print_table(
                 planner.location_name(args.name),
@@ -177,7 +226,8 @@ def main():
             ('sname', 'Line'),
             ('time', 'Arrival'),
             ('rtTime', 'Prel.Arrival'),
-            ('track', 'Track'))
+            ('track', 'Track'),
+            ('origin', 'Origin'))
 
     # DEPARTUREBOARD
     if args.service == 'departureboard':
@@ -186,7 +236,8 @@ def main():
             ('sname', 'Line'),
             ('time', 'Departure'),
             ('rtTime', 'Prel.Departure'),
-            ('track', 'Track'))
+            ('track', 'Track'),
+            ('direction', 'Direction'))
 
     # TRIP
     if args.service == 'trip':

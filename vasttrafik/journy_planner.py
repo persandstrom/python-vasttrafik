@@ -25,6 +25,17 @@ def fetch_token(key, secret):
     return obj['access_token']
 
 
+def get_node(response, *ancestors):
+    """ Traverse tree to node """
+    document = response
+    for ancestor in ancestors:
+        if ancestor not in document:
+            return {}
+        else:
+            document = document[ancestor]
+    return document
+
+
 class JournyPlanner:
     """ Journy planner class"""
 
@@ -38,7 +49,7 @@ class JournyPlanner:
         """ location.allstops """
         response = self.request(
             'location.allstops')
-        return response['LocationList']['StopLocation']
+        return get_node(response, 'LocationList', 'StopLocation')
 
     def location_nearbystops(self, origin_coord_lat, origin_coord_long):
         """ location.nearbystops """
@@ -46,7 +57,7 @@ class JournyPlanner:
             'location.nearbystops',
             originCoordLat=origin_coord_lat,
             originCoordLong=origin_coord_long)
-        return response['LocationList']['StopLocation']
+        return get_node(response, 'LocationList', 'StopLocation')
 
     def location_nearbyaddress(self, origin_coord_lat, origin_coord_long):
         """ location.nearbyaddress """
@@ -54,19 +65,19 @@ class JournyPlanner:
             'location.nearbyaddress',
             originCoordLat=origin_coord_lat,
             originCoordLong=origin_coord_long)
-        return response['']['']
+        return get_node(response, 'LocationList', 'CoordLocation')
 
     def location_name(self, name):
         """ location.name """
         response = self.request(
             'location.name',
             input=name)
-        return response['LocationList']['StopLocation']
+        return get_node(response, 'LocationList', 'StopLocation')
 
     # ARRIVAL BOARD
 
     def arrivalboard(self, stop_id, date=None, time=None):
-        """ /arrivalBoard """
+        """ arrivalBoard """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
         response = self.request(
@@ -74,12 +85,12 @@ class JournyPlanner:
             id=stop_id,
             date=date,
             time=time)
-        return response['ArrivalBoard']['Arrival']
+        return get_node(response, 'ArrivalBoard', 'Arrival')
 
     # DEPARTURE BOARD
 
     def departureboard(self, stop_id, date=None, time=None):
-        """ /departureBoard """
+        """ departureBoard """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
         response = self.request(
@@ -87,12 +98,12 @@ class JournyPlanner:
             id=stop_id,
             date=date,
             time=time)
-        return response['DepartureBoard']['Departure']
+        return get_node(response, 'DepartureBoard', 'Departure')
 
     # TRIP
 
     def trip(self, origin_id, dest_id, date=None, time=None):
-        """ /trip """
+        """ trip """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
         response = self.request(
@@ -101,7 +112,7 @@ class JournyPlanner:
             destId=dest_id,
             date=date,
             time=time)
-        return response['TripList']['Trip']
+        return get_node(response, 'TripList', 'Trip')
 
     def request(self, service, **parameters):
         """ request builder """

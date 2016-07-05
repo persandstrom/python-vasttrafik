@@ -1,14 +1,16 @@
-""" Setup for vtrp """
+""" Setup for vtjp """
 
 from setuptools import setup
 
 setup(
-    name='vtrp',
-    version='0.1.0',
+    name='vtjp',
+    version='0.1.1',
     description='Västtrafik API.',
-    long_description='Python implementation of Västtrafik public API.',
+    long_description='Python implementation of Västtrafik Journy planner'
+                     '(vtjp) public API.',
     url='https://github.com/persandstrom/python-vasttrafik',
     author='Per Sandström',
+    author_email='per.j.sandstrom@gmail.com',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -22,11 +24,11 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
     keywords='vasttrafik västtrafik',
-    install_requires=['requests>=2.9.1'],
+    install_requires=['requests>=2.9.1', 'tabulate>=0.7.5'],
     packages=['vasttrafik'],
     zip_safe=True,
     entry_points={
         'console_scripts': [
-            'vtrp=vasttrafik.__main__:main',
+            'vtjp=vasttrafik.__main__:main',
         ]
     })
