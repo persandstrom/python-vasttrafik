@@ -66,6 +66,8 @@ def print_trip_table(document):
     for alternative in document:
         altnr += 1
         first_trip_in_alt = True
+        if not isinstance(alternative['Leg'], list):
+            alternative['Leg'] = [alternative['Leg']]
         for part in alternative['Leg']:
             orig = part['Origin']
             dest = part['Destination']
