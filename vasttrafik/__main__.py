@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
 """ Main """
 
 from __future__ import print_function
 import argparse
-import configparser
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
+
 import os
 import tabulate
 from vasttrafik import JournyPlanner
@@ -93,7 +99,7 @@ def main():
     key = config.get('credentials', 'key')
     secret = config.get('credentials', 'secret')
     parser = argparse.ArgumentParser(
-        description='Västtrafik journy planner (vtjp)')
+        description=u'Västtrafik journy planner (vtjp)')
     parser.add_argument(
         '-k',
         '--key',
