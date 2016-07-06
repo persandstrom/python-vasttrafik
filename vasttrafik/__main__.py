@@ -112,7 +112,7 @@ def main():
 
     # STORE CREDENTIALS
     service_parser.add_parser(
-        'storecredentials',
+        'store',
         help='Store credentials to configuration file')
 
     # LOCATION
@@ -152,7 +152,7 @@ def main():
 
     # ARIVAL BOARD
     arrival_parser = service_parser.add_parser(
-        'arrivalboard',
+        'arrival',
         help='Get arrival board for stop')
     arrival_parser.add_argument(
         'id',
@@ -168,7 +168,7 @@ def main():
 
     # DEPARTURE BOARD
     departure_parser = service_parser.add_parser(
-        'departureboard',
+        'departure',
         help='Get departure board for stop')
     departure_parser.add_argument(
         'id',
@@ -216,7 +216,7 @@ def main():
         args.destinationId = planner.location_name(args.destinationId)[0]['id']
 
     # STORE CREDENTIALS
-    if args.service == 'storecredentials':
+    if args.service == 'store':
         config.set('credentials', 'key', args.key)
         config.set('credentials', 'secret', args.secret)
         write_config(config)
@@ -248,7 +248,7 @@ def main():
                 ('lat', 'Latitude'))
 
     # ARRIVALBOARD
-    if args.service == 'arrivalboard':
+    if args.service == 'arrival':
         print_table(
             planner.arrivalboard(args.id, args.date, args.time),
             ('sname', 'Line'),
@@ -258,7 +258,7 @@ def main():
             ('origin', 'Origin'))
 
     # DEPARTUREBOARD
-    if args.service == 'departureboard':
+    if args.service == 'departure':
         print_table(
             planner.departureboard(args.id, args.date, args.time),
             ('sname', 'Line'),

@@ -12,10 +12,10 @@ Västtrafik journy planner (vtjp)
 positional arguments:
   {storecredentials,location,arrivalboard,departureboard,trip}
                         service to call
-    storecredentials    Store credentials to configuration file
+    store               Store credentials to configuration file
     location            Get location information, e.g. stops, addresses
-    arrivalboard        Get arrival board for stop
-    departureboard      Get departure board for stop
+    arrival             Get arrival board for stop
+    departure           Get departure board for stop
     trip                Get trip suggestions
 
 optional arguments:
