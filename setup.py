@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='vtjp',
-    version='0.1.5',
+    version='0.1.7',
     description='Västtrafik API.',
     long_description='Python implementation of Västtrafik Journy planner'
                      '(vtjp) public API.',

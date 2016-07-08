@@ -210,7 +210,6 @@ def main():
     args = parser.parse_args()
 
     planner = JournyPlanner(
-        response_format='JSON',
         key=args.key,
         secret=args.secret)
 
