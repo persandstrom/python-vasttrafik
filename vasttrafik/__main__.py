@@ -253,7 +253,7 @@ def main():
                 ('lat', 'Latitude'))
 
     # ARRIVALBOARD
-    if args.service == 'arrival':
+    elif args.service == 'arrival':
         print_table(
             planner.arrivalboard(args.id, args.date, args.time),
             ('sname', 'Line'),
@@ -263,7 +263,7 @@ def main():
             ('origin', 'Origin'))
 
     # DEPARTUREBOARD
-    if args.service == 'departure':
+    elif args.service == 'departure':
         print_table(
             planner.departureboard(args.id, args.date, args.time),
             ('sname', 'Line'),
@@ -273,13 +273,17 @@ def main():
             ('direction', 'Direction'))
 
     # TRIP
-    if args.service == 'trip':
+    elif args.service == 'trip':
         print_trip_table(
             planner.trip(
                 args.originId,
                 args.destinationId,
                 args.date,
                 args.time))
+
+    # IF NOTHING ELSE PRINT HELP
+    else:
+        parser.print_help()
 
 
 if __name__ == '__main__':
