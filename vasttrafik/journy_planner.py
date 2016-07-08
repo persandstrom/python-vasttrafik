@@ -40,9 +40,8 @@ def _get_node(response, *ancestors):
 class JournyPlanner:
     """ Journy planner class"""
 
-    def __init__(self, key, secret, response_format=''):
+    def __init__(self, key, secret):
         self.token = _fetch_token(key, secret)
-        self.format = 'json' if response_format == 'JSON' else ''
 
     # LOCATION
 
@@ -117,14 +116,13 @@ class JournyPlanner:
 
     def _request(self, service, **parameters):
         """ request builder """
-        urlformat = "{baseurl}/{service}?{parameters}&format={response_format}"
+        urlformat = "{baseurl}/{service}?{parameters}&format=json"
         url = urlformat.format(
             baseurl=API_BASE_URL,
             service=service,
             parameters="&".join([
                 "{}={}".format(key, value) for key, value in parameters.items()
-                ]),
-            response_format=self.format)
+                ]))
 
         headers = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(url, headers=headers)
