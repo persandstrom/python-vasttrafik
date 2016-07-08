@@ -12,7 +12,7 @@ TOKEN_URL = 'https://api.vasttrafik.se/token'
 API_BASE_URL = 'https://api.vasttrafik.se/bin/rest.exe/v2'
 
 
-def fetch_token(key, secret):
+def _fetch_token(key, secret):
     """ Get token from key and secret """
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -26,7 +26,7 @@ def fetch_token(key, secret):
     return obj['access_token']
 
 
-def get_node(response, *ancestors):
+def _get_node(response, *ancestors):
     """ Traverse tree to node """
     document = response
     for ancestor in ancestors:
@@ -41,39 +41,39 @@ class JournyPlanner:
     """ Journy planner class"""
 
     def __init__(self, key, secret, response_format=''):
-        self.token = fetch_token(key, secret)
+        self.token = _fetch_token(key, secret)
         self.format = 'json' if response_format == 'JSON' else ''
 
     # LOCATION
 
     def location_allstops(self):
         """ location.allstops """
-        response = self.request(
+        response = self._request(
             'location.allstops')
-        return get_node(response, 'LocationList', 'StopLocation')
+        return _get_node(response, 'LocationList', 'StopLocation')
 
     def location_nearbystops(self, origin_coord_lat, origin_coord_long):
         """ location.nearbystops """
-        response = self.request(
+        response = self._request(
             'location.nearbystops',
             originCoordLat=origin_coord_lat,
             originCoordLong=origin_coord_long)
-        return get_node(response, 'LocationList', 'StopLocation')
+        return _get_node(response, 'LocationList', 'StopLocation')
 
     def location_nearbyaddress(self, origin_coord_lat, origin_coord_long):
         """ location.nearbyaddress """
-        response = self.request(
+        response = self._request(
             'location.nearbyaddress',
             originCoordLat=origin_coord_lat,
             originCoordLong=origin_coord_long)
-        return get_node(response, 'LocationList', 'CoordLocation')
+        return _get_node(response, 'LocationList', 'CoordLocation')
 
     def location_name(self, name):
         """ location.name """
-        response = self.request(
+        response = self._request(
             'location.name',
             input=name)
-        return get_node(response, 'LocationList', 'StopLocation')
+        return _get_node(response, 'LocationList', 'StopLocation')
 
     # ARRIVAL BOARD
 
@@ -81,12 +81,12 @@ class JournyPlanner:
         """ arrivalBoard """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
-        response = self.request(
+        response = self._request(
             'arrivalBoard',
             id=stop_id,
             date=date,
             time=time)
-        return get_node(response, 'ArrivalBoard', 'Arrival')
+        return _get_node(response, 'ArrivalBoard', 'Arrival')
 
     # DEPARTURE BOARD
 
@@ -94,12 +94,12 @@ class JournyPlanner:
         """ departureBoard """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
-        response = self.request(
+        response = self._request(
             'departureBoard',
             id=stop_id,
             date=date,
             time=time)
-        return get_node(response, 'DepartureBoard', 'Departure')
+        return _get_node(response, 'DepartureBoard', 'Departure')
 
     # TRIP
 
@@ -107,15 +107,15 @@ class JournyPlanner:
         """ trip """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
-        response = self.request(
+        response = self._request(
             'trip',
             originId=origin_id,
             destId=dest_id,
             date=date,
             time=time)
-        return get_node(response, 'TripList', 'Trip')
+        return _get_node(response, 'TripList', 'Trip')
 
-    def request(self, service, **parameters):
+    def _request(self, service, **parameters):
         """ request builder """
         urlformat = "{baseurl}/{service}?{parameters}&format={response_format}"
         url = urlformat.format(
