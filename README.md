@@ -2,6 +2,7 @@
 ``` pip install vtjp ```
 
 ## CLI usage
+```
 usage: vtjp [-h] [-k [KEY]] [-s [SECRET]]
             {store,location,arrival,departure,trip} ...
 
