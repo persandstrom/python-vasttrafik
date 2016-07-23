@@ -2,15 +2,13 @@
 ``` pip install vtjp ```
 
 ## CLI usage
-```
-usage: vtjp.py [-h] [-k [KEY]] [-s [SECRET]]
-               {storecredentials,location,arrivalboard,departureboard,trip}
-               ...
+usage: vtjp [-h] [-k [KEY]] [-s [SECRET]]
+            {store,location,arrival,departure,trip} ...
 
 Västtrafik journy planner (vtjp)
 
 positional arguments:
-  {storecredentials,location,arrivalboard,departureboard,trip}
+  {store,location,arrival,departure,trip}
                         service to call
     store               Store credentials to configuration file
     location            Get location information, e.g. stops, addresses
