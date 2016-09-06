@@ -3,14 +3,13 @@
 
 ## CLI usage
 ```
-usage: vtjp.py [-h] [-k [KEY]] [-s [SECRET]]
-               {storecredentials,location,arrivalboard,departureboard,trip}
-               ...
+usage: vtjp [-h] [-k [KEY]] [-s [SECRET]]
+            {store,location,arrival,departure,trip} ...
 
 Västtrafik journy planner (vtjp)
 
 positional arguments:
-  {storecredentials,location,arrivalboard,departureboard,trip}
+  {store,location,arrival,departure,trip}
                         service to call
     store               Store credentials to configuration file
     location            Get location information, e.g. stops, addresses
@@ -43,7 +42,7 @@ print(jp.departureboard(brunnsparken_id))
 ```
 
 ## API credentials
-The new API uses OAuth2 as authorization and in order to acquire CONSUMER_KEY and CONSUMER_SECRET from the API, one needs to subscribe to it. Please refer to [Västtrafik](https://labs.vasttrafik.se) in to get your API credentials. When they are acquired, update ```credentials.txt``` and the wrapper will work.
+The new API uses OAuth2 as authorization and in order to acquire CONSUMER_KEY and CONSUMER_SECRET from the API, one needs to subscribe to it. Please refer to [Västtrafik](https://labs.vasttrafik.se) in to get your API credentials.
 
 
 This software is a fork of https://github.com/axelniklasson/vasttrafik-api-wrapper
