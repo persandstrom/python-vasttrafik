@@ -4,26 +4,13 @@ Västtrafik API
 """
 
 import base64
+import datetime
 import json
 import time as time_module
 import requests
 
 TOKEN_URL = 'https://api.vasttrafik.se/token'
 API_BASE_URL = 'https://api.vasttrafik.se/bin/rest.exe/v2'
-
-
-def _fetch_token(key, secret):
-    """ Get token from key and secret """
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + base64.b64encode(
-            (key + ':' + secret).encode()).decode()
-        }
-    data = {'grant_type': 'client_credentials'}
-
-    response = requests.post(TOKEN_URL, data=data, headers=headers)
-    obj = json.loads(response.content.decode('UTF-8'))
-    return obj['access_token']
 
 
 def _get_node(response, *ancestors):
@@ -40,14 +27,27 @@ def _get_node(response, *ancestors):
 class JournyPlanner:
     """ Journy planner class"""
 
-    def __init__(self, key, secret):
+    def __init__(self, key, secret, expiery=60):
         self._key = key
         self._secret = secret
+        self._expiery = expiery
         self.update_token()
 
     def update_token(self):
-        """Update authentication token."""
-        self.token = _fetch_token(self._key, self._secret)
+        """ Get token from key and secret """
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + base64.b64encode(
+                (self._key + ':' + self._secret).encode()).decode()
+            }
+        data = {'grant_type': 'client_credentials'}
+
+        response = requests.post(TOKEN_URL, data=data, headers=headers)
+        obj = json.loads(response.content.decode('UTF-8'))
+        self._token = obj['access_token']
+        self._token_expire_date = (
+            datetime.datetime.now() +
+            datetime.timedelta(minutes=self._expiery))
 
     # LOCATION
 
@@ -137,8 +137,9 @@ class JournyPlanner:
             parameters="&".join([
                 "{}={}".format(key, value) for key, value in parameters.items()
                 ]))
-
-        headers = {'Authorization': 'Bearer ' + self.token}
+        if datetime.datetime.now() > self._token_expire_date:
+            self.update_token()
+        headers = {'Authorization': 'Bearer ' + self._token}
         res = requests.get(url, headers=headers)
         if res.status_code == 200:
             return json.loads(res.content.decode('UTF-8'), 'UTF-8')
