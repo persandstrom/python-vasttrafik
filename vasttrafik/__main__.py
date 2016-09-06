@@ -171,6 +171,10 @@ def main():
         'time',
         nargs='?',
         help='The time, default current time')
+    arrival_parser.add_argument(
+        '--direction',
+        default=None,
+        help='Id or name to filter on arrivals from specified direction')
 
     # DEPARTURE BOARD
     departure_parser = service_parser.add_parser(
@@ -187,6 +191,10 @@ def main():
         'time',
         nargs='?',
         help='The time, default current time')
+    departure_parser.add_argument(
+        '--direction',
+        default=None,
+        help='Id or name to filter on departures in specified direction')
 
     # TRIP
     departure_parser = service_parser.add_parser(
@@ -213,12 +221,20 @@ def main():
         key=args.key,
         secret=args.secret)
 
-    if hasattr(args, 'id') and not args.id.isdigit():
-        args.id = planner.location_name(args.id)[0]['id']
-    if hasattr(args, 'originId') and not args.originId.isdigit():
-        args.originId = planner.location_name(args.originId)[0]['id']
-    if hasattr(args, 'destinationId') and not args.destinationId.isdigit():
-        args.destinationId = planner.location_name(args.destinationId)[0]['id']
+    def name_to_id(attribute):
+        """ Check if the stop name has to be convereted to an ID"""
+        if not hasattr(args, attribute):
+            return
+        value = getattr(args, attribute)
+        if not value or value.isdigit():
+            return
+        setattr(args, attribute, planner.location_name(value)[0]['id'])
+
+    # Convert stop names to id if needed
+    name_to_id('id')
+    name_to_id('originId')
+    name_to_id('destinationId')
+    name_to_id('direction')
 
     # STORE CREDENTIALS
     if args.service == 'store':
@@ -255,7 +271,11 @@ def main():
     # ARRIVALBOARD
     elif args.service == 'arrival':
         print_table(
-            planner.arrivalboard(args.id, args.date, args.time),
+            planner.arrivalboard(
+                args.id,
+                date=args.date,
+                time=args.time,
+                direction=args.direction),
             ('sname', 'Line'),
             ('time', 'Arrival'),
             ('rtTime', 'Prel.Arrival'),
@@ -265,7 +285,11 @@ def main():
     # DEPARTUREBOARD
     elif args.service == 'departure':
         print_table(
-            planner.departureboard(args.id, args.date, args.time),
+            planner.departureboard(
+                args.id,
+                date=args.date,
+                time=args.time,
+                direction=args.direction),
             ('sname', 'Line'),
             ('time', 'Departure'),
             ('rtTime', 'Prel.Departure'),

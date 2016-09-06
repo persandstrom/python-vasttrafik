@@ -76,28 +76,36 @@ class JournyPlanner:
 
     # ARRIVAL BOARD
 
-    def arrivalboard(self, stop_id, date=None, time=None):
+    def arrivalboard(self, stop_id, date=None, time=None, direction=None):
         """ arrivalBoard """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
+        request_parameters = {
+            'id': stop_id,
+            'date': date,
+            'time': time}
+        if direction:
+            request_parameters['directiona'] = direction
         response = self._request(
             'arrivalBoard',
-            id=stop_id,
-            date=date,
-            time=time)
+            **request_parameters)
         return _get_node(response, 'ArrivalBoard', 'Arrival')
 
     # DEPARTURE BOARD
 
-    def departureboard(self, stop_id, date=None, time=None):
+    def departureboard(self, stop_id, date=None, time=None, direction=None):
         """ departureBoard """
         date = date if date else time_module.strftime("%Y-%m-%d")
         time = time if time else time_module.strftime("%H:%M")
+        request_parameters = {
+            'id': stop_id,
+            'date': date,
+            'time': time}
+        if direction:
+            request_parameters['direction'] = direction
         response = self._request(
             'departureBoard',
-            id=stop_id,
-            date=date,
-            time=time)
+            **request_parameters)
         return _get_node(response, 'DepartureBoard', 'Departure')
 
     # TRIP
