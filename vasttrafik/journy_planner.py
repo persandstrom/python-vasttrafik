@@ -41,7 +41,13 @@ class JournyPlanner:
     """ Journy planner class"""
 
     def __init__(self, key, secret):
-        self.token = _fetch_token(key, secret)
+        self._key = key
+        self._secret = secret
+        self.update_token()
+
+    def update_token(self):
+        """Update authentication token."""
+        self.token = _fetch_token(self._key, self._secret)
 
     # LOCATION
 
