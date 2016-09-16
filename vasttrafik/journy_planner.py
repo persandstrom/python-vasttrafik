@@ -4,13 +4,15 @@ Västtrafik API
 """
 
 import base64
-import datetime
 import json
-import time as time_module
 import requests
+from datetime import datetime
+from datetime import timedelta
 
 TOKEN_URL = 'https://api.vasttrafik.se/token'
 API_BASE_URL = 'https://api.vasttrafik.se/bin/rest.exe/v2'
+DATE_FORMAT = '%Y-%m-%d'
+TIME_FORMAT = '%H:%M'
 
 
 def _get_node(response, *ancestors):
@@ -46,8 +48,8 @@ class JournyPlanner:
         obj = json.loads(response.content.decode('UTF-8'))
         self._token = obj['access_token']
         self._token_expire_date = (
-            datetime.datetime.now() +
-            datetime.timedelta(minutes=self._expiery))
+            datetime.now() +
+            timedelta(minutes=self._expiery))
 
     # LOCATION
 
@@ -82,14 +84,14 @@ class JournyPlanner:
 
     # ARRIVAL BOARD
 
-    def arrivalboard(self, stop_id, date=None, time=None, direction=None):
+    def arrivalboard(self, stop_id, date=None, direction=None):
         """ arrivalBoard """
-        date = date if date else time_module.strftime("%Y-%m-%d")
-        time = time if time else time_module.strftime("%H:%M")
+        date = date if date else datetime.now()
         request_parameters = {
             'id': stop_id,
-            'date': date,
-            'time': time}
+            'date': date.strftime(DATE_FORMAT),
+            'time': date.strftime(TIME_FORMAT)
+        }
         if direction:
             request_parameters['directiona'] = direction
         response = self._request(
@@ -99,14 +101,14 @@ class JournyPlanner:
 
     # DEPARTURE BOARD
 
-    def departureboard(self, stop_id, date=None, time=None, direction=None):
+    def departureboard(self, stop_id, date=None, direction=None):
         """ departureBoard """
-        date = date if date else time_module.strftime("%Y-%m-%d")
-        time = time if time else time_module.strftime("%H:%M")
+        date = date if date else datetime.now()
         request_parameters = {
             'id': stop_id,
-            'date': date,
-            'time': time}
+            'date': date.strftime(DATE_FORMAT),
+            'time': date.strftime(TIME_FORMAT)
+        }
         if direction:
             request_parameters['direction'] = direction
         response = self._request(
@@ -116,16 +118,15 @@ class JournyPlanner:
 
     # TRIP
 
-    def trip(self, origin_id, dest_id, date=None, time=None):
+    def trip(self, origin_id, dest_id, date=None):
         """ trip """
-        date = date if date else time_module.strftime("%Y-%m-%d")
-        time = time if time else time_module.strftime("%H:%M")
+        date = date if date else datetime.now()
         response = self._request(
             'trip',
             originId=origin_id,
             destId=dest_id,
-            date=date,
-            time=time)
+            date=date.strftime(DATE_FORMAT),
+            time=date.strftime(TIME_FORMAT))
         return _get_node(response, 'TripList', 'Trip')
 
     def _request(self, service, **parameters):
@@ -137,7 +138,7 @@ class JournyPlanner:
             parameters="&".join([
                 "{}={}".format(key, value) for key, value in parameters.items()
                 ]))
-        if datetime.datetime.now() > self._token_expire_date:
+        if datetime.now() > self._token_expire_date:
             self.update_token()
         headers = {'Authorization': 'Bearer ' + self._token}
         res = requests.get(url, headers=headers)

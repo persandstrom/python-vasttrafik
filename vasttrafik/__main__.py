@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 import argparse
+from datetime import datetime
 
 try:
     import configparser
@@ -92,7 +93,7 @@ def print_trip_table(document):
     print(tabulate.tabulate(table, headers))
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-locals
 def main():
     """ Main function """
     config = read_config()
@@ -164,11 +165,11 @@ def main():
         'id',
         help='Id or name of stop')
     arrival_parser.add_argument(
-        'date',
+        '--date', '-d',
         nargs='?',
         help='The date, default current date')
     arrival_parser.add_argument(
-        'time',
+        '--time', '-t',
         nargs='?',
         help='The time, default current time')
     arrival_parser.add_argument(
@@ -184,11 +185,11 @@ def main():
         'id',
         help='Id or name of stop')
     departure_parser.add_argument(
-        'date',
+        '--date', '-d',
         nargs='?',
         help='The date, default current date')
     departure_parser.add_argument(
-        'time',
+        '--time', '-t',
         nargs='?',
         help='The time, default current time')
     departure_parser.add_argument(
@@ -207,11 +208,11 @@ def main():
         'destinationId',
         help='ID or name of destination stop')
     departure_parser.add_argument(
-        'date',
+        '--date', '-d',
         nargs='?',
         help='The date, default current date')
     departure_parser.add_argument(
-        'time',
+        '--time', '-t',
         nargs='?',
         help='The time, default current time')
 
@@ -235,6 +236,20 @@ def main():
     name_to_id('originId')
     name_to_id('destinationId')
     name_to_id('direction')
+
+    # PARSE DATE
+    date = datetime.now()
+    if hasattr(args, 'date') and args.date:
+        newdate = datetime.strptime(args.date, '%Y-%m-%d')
+        date = date.replace(
+            year=newdate.year,
+            month=newdate.month,
+            day=newdate.day)
+    if hasattr(args, 'time') and args.time:
+        newtime = datetime.strptime(args.time, '%H:%M')
+        date = date.replace(
+            hour=newtime.hour,
+            minute=newtime.minute)
 
     # STORE CREDENTIALS
     if args.service == 'store':
@@ -273,8 +288,7 @@ def main():
         print_table(
             planner.arrivalboard(
                 args.id,
-                date=args.date,
-                time=args.time,
+                date=date,
                 direction=args.direction),
             ('sname', 'Line'),
             ('time', 'Arrival'),
@@ -287,8 +301,7 @@ def main():
         print_table(
             planner.departureboard(
                 args.id,
-                date=args.date,
-                time=args.time,
+                date=date,
                 direction=args.direction),
             ('sname', 'Line'),
             ('time', 'Departure'),
@@ -302,8 +315,7 @@ def main():
             planner.trip(
                 args.originId,
                 args.destinationId,
-                args.date,
-                args.time))
+                date=date))
 
     # IF NOTHING ELSE PRINT HELP
     else:
