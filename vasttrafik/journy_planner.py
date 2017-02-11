@@ -14,6 +14,8 @@ API_BASE_URL = 'https://api.vasttrafik.se/bin/rest.exe/v2'
 DATE_FORMAT = '%Y-%m-%d'
 TIME_FORMAT = '%H:%M'
 
+class Error(Exception):
+    pass
 
 def _get_node(response, *ancestors):
     """ Traverse tree to node """
@@ -29,7 +31,7 @@ def _get_node(response, *ancestors):
 class JournyPlanner:
     """ Journy planner class"""
 
-    def __init__(self, key, secret, expiery=50):
+    def __init__(self, key, secret, expiery=59):
         self._key = key
         self._secret = secret
         self._expiery = expiery
@@ -145,5 +147,5 @@ class JournyPlanner:
         if res.status_code == 200:
             return json.loads(res.content.decode('UTF-8'))
         else:
-            raise Exception('Error: ' + str(res.status_code) +
+            raise Error('Error: ' + str(res.status_code) +
                             str(res.content))
